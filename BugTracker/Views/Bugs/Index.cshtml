@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BugTracker.Models.Bug>
+﻿@model BugTracker.Models.BugCategoryViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -9,26 +9,42 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form asp-controller="Bugs" asp-action="Index" method="get">
+    <p>
+
+        <select asp-for="BugCategory" asp-items="Model.Categories">
+            <option value=""></option>
+        </select>
+
+        Title: <input type="text" name="SearchString" />
+        <input type="submit" value="Filter" />
+    </p>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.Bugs[0].Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateSubmitted)
+                @Html.DisplayNameFor(model => model.Bugs[0].DateSubmitted)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Category)
+                @Html.DisplayNameFor(model => model.Bugs[0].Category)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Bugs[0].Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bugs[0].Severity)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Bugs) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
@@ -41,6 +57,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Severity)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

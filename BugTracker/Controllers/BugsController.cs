@@ -21,11 +21,33 @@ namespace BugTracker.Controllers
         }
 
         // GET: Bugs
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string bugCategory, string searchString)
         {
-            return View(await _context.Bug.ToListAsync());
-        }
+            // Use LINQ to get list of categories.
+            IQueryable<string> categoryQuery = from m in _context.Bug
+                                            orderby m.Category
+                                            select m.Category;
+            var bugs = from m in _context.Bug
+                         select m;
 
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                bugs = bugs.Where(s => s.Title!.Contains(searchString));
+            }
+
+            if (!string.IsNullOrEmpty(bugCategory))
+            {
+                bugs = bugs.Where(x => x.Category == bugCategory);
+            }
+
+            var bugCategoryVM = new BugCategoryViewModel
+            {
+                Categories = new SelectList(await categoryQuery.Distinct().ToListAsync()),
+                Bugs = await bugs.ToListAsync()
+            };
+
+            return View(bugCategoryVM);
+        }
         // GET: Bugs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -55,7 +77,7 @@ namespace BugTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,DateSubmitted,Category,Description")] Bug bug)
+        public async Task<IActionResult> Create([Bind("Id,Title,DateSubmitted,Category,Description,Severity")] Bug bug)
         {
             if (ModelState.IsValid)
             {
@@ -87,7 +109,7 @@ namespace BugTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,DateSubmitted,Category,Description")] Bug bug)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,DateSubmitted,Category,Description,Severity")] Bug bug)
         {
             if (id != bug.Id)
             {
